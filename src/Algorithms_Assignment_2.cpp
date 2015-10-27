@@ -68,7 +68,7 @@ public:
 //					cout << "Vertex from edge: "<< edgeList[k].v << endl;
 //					cout << "Vertex instance:  "<< &vertexList[j] << endl;
 //					cout << "k is " << k << ", i is " << i << ", j is " << j << endl;
-					edgeList[k].weight = (rand() + 0.5) / (RAND_MAX + 1.0);
+					edgeList[k].weight = (rand() + 0.5) / (2*(RAND_MAX + 1.0));
 
 					weightMatrix[i][j] = edgeList[k].weight;
 					weightMatrix[j][i] = edgeList[k].weight;
@@ -93,22 +93,29 @@ public:
 //partitions the 2D subarray (array[p...r][]) around pivot row array[r][]
 int partition2D(Edge* edges, int p, int r) {
 	double pivot = edges[r].weight; // use last weight in the list as the pivot
-	int i = p - 1;
+	int i = p;
+	//Edge* temp;
 	for (int j = p; j < r; j++) {
 		if (edges[j].weight <= pivot) {
-			i++;
+//			temp = &edges[i];
+//			edges[i] = edges[j];
+//			edges[j] = *temp;
 			swap(edges[j], edges[i]);
+			i++;
 		}
 	}
-	swap(edges[i + 1], edges[r]);
-	return i + 1;
+//	temp = &edges[i+1];
+//	edges[i+1] = edges[r];
+//	edges[i+1] = *temp;
+	swap(edges[i], edges[r]);
+	return i;
 }
 
 void quickEdgeSort(Edge* edges, int p, int r) {
 	if (p < r) {
 		int q = partition2D(edges, p, r);
 		quickEdgeSort(edges, p, q - 1);
-		quickEdgeSort(edges, q, r);
+		quickEdgeSort(edges, q + 1, r);
 	}
 	return;
 }
@@ -161,12 +168,13 @@ int main() {
 	int n_vec[5] = { 10, 100, 200, 500, 1000 };
 
 	for (int n = 0; n < 5; n++) {
-		RandCompleteGraph* graph = new RandCompleteGraph(n_vec[n]);
 
 		double total_weight_sum_n = 0;
 		double total_time_elapsed_n = 0;
 
 		for (int i = 0; i < 15; i++) {
+			RandCompleteGraph* graph = new RandCompleteGraph(n_vec[n]);
+
 			clock_t t;
 			t = clock();
 			Edge* mst_edges = kruskalMST(graph);
