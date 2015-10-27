@@ -23,8 +23,8 @@ public:
 
 class Edge {
 public:
-	Vertex u;
-	Vertex v;
+	Vertex* u;
+	Vertex* v;
 	double weight;
 };
 
@@ -63,8 +63,11 @@ public:
 					vertexList[i].index = i;
 					vertexList[j].index = j;
 
-					edgeList[k].u = vertexList[i];
-					edgeList[k].v = vertexList[j];
+					edgeList[k].u = &vertexList[i];
+					edgeList[k].v = &vertexList[j];
+//					cout << "Vertex from edge: "<< edgeList[k].v << endl;
+//					cout << "Vertex instance:  "<< &vertexList[j] << endl;
+//					cout << "k is " << k << ", i is " << i << ", j is " << j << endl;
 					edgeList[k].weight = (rand() + 0.5) / (RAND_MAX + 1.0);
 
 					weightMatrix[i][j] = edgeList[k].weight;
@@ -110,11 +113,11 @@ void quickEdgeSort(Edge* edges, int p, int r) {
 	return;
 }
 
-Vertex* findSet(Vertex u) {
-	if (u.parent != &u) {
-		u.parent = findSet(*u.parent);
+Vertex* findSet(Vertex* u) {
+	if (u->parent != u) {
+		u->parent = findSet(u->parent);
 	}
-	return u.parent;
+	return u->parent;
 }
 
 void link(Vertex* u, Vertex* v) {
@@ -127,7 +130,7 @@ void link(Vertex* u, Vertex* v) {
 	}
 }
 
-void setUnion(Vertex u, Vertex v) {
+void setUnion(Vertex* u, Vertex* v) {
 	link(findSet(u), findSet(v));
 }
 
@@ -136,7 +139,7 @@ Edge* kruskalMST(RandCompleteGraph* graph) {
 
 	//For all v, "Makeset(v)" simply sets parent[v] = v
 	for (int i = 0; i < graph->n_vertices; i++) {
-		graph->vertexList[i].parent = &graph->vertexList[i];
+		graph->vertexList[i].parent = &(graph->vertexList[i]);
 		graph->vertexList[i].rank = 0;
 	}
 
@@ -157,15 +160,35 @@ int main() {
 
 	int n_vec[5] = { 10, 100, 200, 500, 1000 };
 
-	for (int n = 0; n < 1; n++) {
+	for (int n = 0; n < 5; n++) {
 		RandCompleteGraph* graph = new RandCompleteGraph(n_vec[n]);
 
-		clock_t t;
-		t = clock();
-		Edge* mst_edges = kruskalMST(graph);
-		t = clock() - t;
+		double total_weight_sum_n = 0;
+		double total_time_elapsed_n = 0;
 
-		cout << "Time is: " << t << endl;
+		for (int i = 0; i < 15; i++) {
+			clock_t t;
+			t = clock();
+			Edge* mst_edges = kruskalMST(graph);
+			t = (clock() - t);
+			double single_tree_time = (double) t / (CLOCKS_PER_SEC);
+
+			double mst_weight_sum_n = 0;
+			for (int j = 0; j < n_vec[n] - 1; j++) {    // n-1 is # of nodes in the MST
+				mst_weight_sum_n += mst_edges[j].weight;
+			}
+
+			total_weight_sum_n += mst_weight_sum_n;
+			total_time_elapsed_n += single_tree_time;
+		}
+
+		double expected_weight_sum_n = total_weight_sum_n / 15;
+		double expected_time_elapsed_n = total_time_elapsed_n / 15;
+
+		cout << "Expected Running Time for n = " << n_vec[n] << ", is "
+				<< expected_time_elapsed_n << "s" << endl;
+		cout << "Expected Weight of MST for n = " << n_vec[n] << ", is "
+				<< expected_weight_sum_n << endl;
 	}
 	return 0;
 }
