@@ -75,6 +75,16 @@ public:
 			}
 		}
 	}
+
+	~RandCompleteGraph(void) {
+		for (int i = 0; i < n_vertices; i++) {
+			delete[] weightMatrix[i];
+		}
+		delete[] weightMatrix;
+		delete[] vertexList;
+		delete[] edgeList;
+	}
+
 };
 
 //partitions the 2D subarray (array[p...r][]) around pivot row array[r][]
@@ -107,28 +117,25 @@ Vertex* findSet(Vertex u) {
 	return u.parent;
 }
 
-void link(Vertex* u,Vertex* v)
-{
-	if (u->rank > v->rank){
+void link(Vertex* u, Vertex* v) {
+	if (u->rank > v->rank) {
 		v->parent = u;
-	}
-	else {
+	} else {
 		u->parent = v;
-		if(u->rank == v->rank)
+		if (u->rank == v->rank)
 			v->rank++;
 	}
 }
 
 void setUnion(Vertex u, Vertex v) {
-		link(findSet(u),findSet(v));
+	link(findSet(u), findSet(v));
 }
 
 Edge* kruskalMST(RandCompleteGraph* graph) {
 	Edge* setA = new Edge[graph->n_vertices - 1]; //Set A begins empty, it is the set of edges in the minimum spanning tree
 
 	//For all v, "Makeset(v)" simply sets parent[v] = v
-	for (int i = 0; i < graph->n_vertices; i++)
-	{
+	for (int i = 0; i < graph->n_vertices; i++) {
 		graph->vertexList[i].parent = &graph->vertexList[i];
 		graph->vertexList[i].rank = 0;
 	}
@@ -137,14 +144,13 @@ Edge* kruskalMST(RandCompleteGraph* graph) {
 
 	int k = 0;
 	for (int i = 0; i < graph->m_edges; i++)
-		if (findSet(graph->edgeList[i].u) != findSet(graph->edgeList[i].v))
-				{
-					setA[k] = graph->edgeList[i];
-					k++;
+		if (findSet(graph->edgeList[i].u) != findSet(graph->edgeList[i].v)) {
+			setA[k] = graph->edgeList[i];
+			k++;
 
-					setUnion(graph->edgeList[i].u,graph->edgeList[i].v);
-				}
-			return setA;
+			setUnion(graph->edgeList[i].u, graph->edgeList[i].v);
+		}
+	return setA;
 }
 
 int main() {
@@ -156,8 +162,8 @@ int main() {
 
 		clock_t t;
 		t = clock();
-			Edge* mst_edges = kruskalMST(graph);
-		t = clock() -t;
+		Edge* mst_edges = kruskalMST(graph);
+		t = clock() - t;
 
 		cout << "Time is: " << t << endl;
 	}
